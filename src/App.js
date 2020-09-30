@@ -1,26 +1,40 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react'
+import CreateCall from './components/CreateCall'
+// import ReactDOM from 'react-dom'
+
+
 
 function App() {
+  const [joined, setJoined] = useState(false)
+  const [channel,setChannel] = useState('')
+  const [value,setValue] = useState('')
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    setJoined(true)
+    setChannel(value)
+  }
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    <>
+      <div className="container">
+        <input
+          type="text"
+          id="channel"
+          placeholder="Enter Channel name"
+          value = {value}
+          onChange = {(e) => {setValue(e.target.value)}}
+        />
+        <input
+          type="submit"
+          value="Join"
+          onClick={handleSubmit}
+          disabled={joined ? true : false}
+        />
+      </div>
+      {joined && (
+        <CreateCall channel={channel} />
+      )}
+    </>
+  )
 }
 
-export default App;
+export default App
