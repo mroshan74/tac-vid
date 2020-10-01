@@ -43,7 +43,8 @@ const Listeners = () => {
         e.preventDefault()
         const encryptId = shortid.generate()
         setEncrypt(encryptId)
-        axios.post(`/users/call?id=${userId}&rec=${state.callId}`,{encryptId})
+        // axios.post(`/users/call?id=${userId}&rec=${state.callId}`,{encryptId})
+        axios.post(`/users/call`,{encryptId,id:userId,recipient:state.callId})
             .then(res => {
                 if(res.data.ok){
                     console.log('Call waiting')
@@ -55,9 +56,7 @@ const Listeners = () => {
             })
 
     }
-    const handleAcceptCall = () => {
-        setAcceptCall(true)
-    }
+
     const resetCallHandler = () =>{
         setIncoming({
             callerId: '',
@@ -69,6 +68,25 @@ const Listeners = () => {
         setWaitCall(false)
         setEncrypt('')
     }
+
+    const handleAcceptCall = () => {
+        const emitCallData = {
+            caller: incoming.callerId,
+            receiver: userId,
+            channelId: incoming.channelId
+        }
+        socket.emit('acceptCall',emitCallData)
+        setAcceptCall(true)
+    }
+    const handleRejectCall = () => {
+        const emitRejectData = {
+            caller: incoming.callerId,
+            receiver: userId,
+        }
+        socket.emit('rejectCall',emitRejectData)
+        resetCallHandler()
+    }
+
     return (
         <div>
             <div>
@@ -87,15 +105,15 @@ const Listeners = () => {
                         <h4>Call Receiving</h4>
                         <h3>{incoming.callerName}</h3>
                         <button onClick={() => {handleAcceptCall()}}>Accept</button>
-                        <button>Reject</button>
+                        <button onClick={() => {handleRejectCall()}}>Reject</button>
                     </Fragment>
                 }
             </div>
             {
-                acceptCall && <CreateCall channel={incoming.channelId} callBack={resetCallHandler}/>
+                acceptCall && <CreateCall id={userId} callType={'direct'} channel={incoming.channelId} callBack={resetCallHandler} ui/>
             }
             {
-                waitCall && <CreateCall channel={encrypt} callBack={resetCallHandler}/>
+                waitCall && <CreateCall id={userId} callType={'direct'} channel={encrypt} callBack={resetCallHandler}/>
             }
             <pre>{JSON.stringify(incoming)}</pre>
         </div>
