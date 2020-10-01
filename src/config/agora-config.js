@@ -13,4 +13,6 @@ export const options = {
     // Pass a token if your project enables the App Certificate
     token: null,
     uid: null,
+    channel: null,
+    role: "audience"
 }

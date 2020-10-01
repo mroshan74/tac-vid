@@ -5,7 +5,7 @@ import './App.css'
 import socket from '../config/socket'
 
 let remoteUsers = {}
-const CreateCall = ({ callType, channel, callBack = f => f, id = '', token = ''}) => {
+const CreateCall = ({ callType, channel, callBack = f => f, id = '', token = '',role = 'audience'}) => {
   console.log(channel, 'channel++++++++++++++')
   const channelRef = useRef(channel)
   const screenShare = useRef()
@@ -42,26 +42,34 @@ const CreateCall = ({ callType, channel, callBack = f => f, id = '', token = ''}
       }
 
       // Create client for the user 
-      rtc.client = AgoraRTC.createClient({ mode: "rtc", codec: "h264" })
-      // Listen for remote connections
-      rtc.client.on('user-published', handleUserPublished)
-      // Listen for remote disconnection
-      rtc.client.on('user-unpublished', handleUserUnpublished)
+      console.log(role)
+      rtc.client = AgoraRTC.createClient({ mode: "live", codec: "h264", role })
+      
+      //audience
+      //if(role === 'audience'){
+        // Listen for remote connections
+        rtc.client.on('user-published', handleUserPublished)
+        // Listen for remote disconnection
+        rtc.client.on('user-unpublished', handleUserUnpublished)
+      //}
+
       // Join the RTC channel
       console.log(channelRef.current.value,'RTC*********************************')
       const uid = await rtc.client.join(options.appId, channelRef.current , options.token, null)
       
-      // Create an audio track from the audio captured by a microphone
-      rtc.localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack()
-      // Create a video track from the video captured by a camera
-      rtc.localVideoTrack = await AgoraRTC.createCameraVideoTrack()
-      
-      // Play local user video in the local-stream html element
-      rtc.localVideoTrack.play("local-stream")
-      
-      // Publish the local audio and video tracks to the channel
-      await rtc.client.publish([rtc.localAudioTrack, rtc.localVideoTrack])
-      console.log("publish success!")
+      if(role === 'host'){
+        // Create an audio track from the audio captured by a microphone
+        rtc.localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack()
+        // Create a video track from the video captured by a camera
+        rtc.localVideoTrack = await AgoraRTC.createCameraVideoTrack()
+        
+        // Play local user video in the local-stream html element
+        rtc.localVideoTrack.play("local-stream")
+        
+        // Publish the local audio and video tracks to the channel
+        await rtc.client.publish([rtc.localAudioTrack, rtc.localVideoTrack])
+        console.log("publish success!")
+      }
     }
     catch(err){
       console.log(err)
